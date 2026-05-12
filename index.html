@@ -5,63 +5,138 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blinkart - Organized Wholesale</title>
   <style>
-    :root { --primary: #1a8a42; --accent: #ffcc00; --sale: #ff4757; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding-bottom: 80px; }
+    :root { 
+      --primary: #ff6600;      
+      --accent: #fff200;       
+      --sale: #ff3300;         
+    }
+    
+    body { 
+      font-family: 'Segoe UI', sans-serif; 
+      margin: 0; 
+      padding-bottom: 20px;
+      background-image: url('unsplash.com');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+    }
+
+    /* 1. Real App Loading Screen Styles */
+    #loadingScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--accent); z-index: 99999;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+    }
+    .loader-logo { font-size: 42px; font-weight: 800; color: var(--primary); margin-bottom: 20px; }
+    .spinner {
+      width: 50px; height: 50px; border: 5px solid #fff;
+      border-top: 5px solid var(--primary); border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
     header { 
-      background: var(--accent); padding: 12px 20px; display: flex; 
-      justify-content: space-between; align-items: center; 
-      position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+      background: rgba(255, 242, 0, 0.95); padding: 12px 15px; 
+      display: flex; flex-direction: column; gap: 10px;
+      position: sticky; top: 0; z-index: 1000; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15); backdrop-filter: blur(5px);
     }
-    .logo { font-size: 24px; font-weight: 800; color: var(--primary); }
-    .search-box { flex: 1; margin: 0 15px; }
-    .search-box input { width: 100%; padding: 10px; border-radius: 10px; border: none; outline: none; }
+    
+    .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .logo { font-size: 24px; font-weight: 800; color: var(--primary); text-shadow: 1px 1px 0px #fff; }
+    
+    .top-nav-actions { display: flex; gap: 15px; align-items: center; }
+    .nav-item { 
+      position: relative; font-size: 14px; font-weight: 700; cursor: pointer; 
+      color: #333; background: white; padding: 6px 12px; border-radius: 20px; 
+      border: 1px solid #ffaa00; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .badge { position: absolute; top: -8px; right: -8px; background: var(--sale); color: white; padding: 2px 6px; border-radius: 50%; font-size: 10px; display: none; }
 
-    #saleBanner {
-      background: var(--sale); color: white; text-align: center; 
-      padding: 10px; font-weight: bold; display: none; font-size: 16px;
+    .search-box { width: 100%; }
+    .search-box input { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid var(--primary); outline: none; box-sizing: border-box; }
+
+    #saleBanner { background: var(--sale); color: white; text-align: center; padding: 10px; font-weight: bold; display: none; font-size: 16px; }
+
+    #appNotification {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+      background: #333; color: white; padding: 12px 25px; border-radius: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 9999; font-weight: 600; font-size: 14px;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid var(--accent); white-space: nowrap;
     }
+    #appNotification.show { transform: translateX(-50%) translateY(0); }
 
     .category-title { 
-      background: #eee; padding: 10px 20px; font-weight: bold; 
-      color: var(--primary); border-left: 5px solid var(--primary); margin: 20px 0 10px 0;
+      background: rgba(255, 242, 0, 0.9); padding: 10px 20px; font-weight: bold; 
+      color: #222; border-left: 5px solid var(--primary); margin: 25px 0 15px 0;
+      backdrop-filter: blur(3px); box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .container { padding: 0 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-    .card { 
-      background: white; border-radius: 15px; padding: 12px; text-align: center; 
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee;
-    }
-    .card h4 { font-size: 14px; margin: 8px 0; height: 35px; overflow: hidden; color: #333; }
-    .price-old { text-decoration: line-through; color: #999; font-size: 11px; }
-    .price-new { color: #e67e22; font-weight: bold; font-size: 17px; display: block; margin-bottom: 8px; }
     
-    .add-btn { 
-      background: var(--primary); color: white; border: none; width: 100%; 
-      padding: 8px; border-radius: 8px; font-weight: 600; cursor: pointer;
+    .card { 
+      background: rgba(255, 255, 255, 0.92); border-radius: 15px; padding: 12px; 
+      text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid rgba(255, 102, 0, 0.2); backdrop-filter: blur(2px);
     }
+    .card h4 { font-size: 14px; margin: 8px 0; height: 35px; overflow: hidden; color: #111; font-weight: 700; }
+    .price-old { text-decoration: line-through; color: #777; font-size: 11px; }
+    .price-new { color: var(--primary); font-weight: bold; font-size: 17px; display: block; margin-bottom: 8px; }
+    
+    /* Grid system for Add/Remove buttons inside card */
+    .btn-group { display: flex; gap: 5px; }
+    .add-btn { background: var(--primary); color: white; border: none; flex: 2; padding: 8px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .remove-btn { background: #ccc; color: #333; border: none; flex: 1; padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .remove-btn.active { background: var(--sale); color: white; }
 
-    /* Bottom Nav */
-    .bottom-nav { 
-      position: fixed; bottom: 0; width: 100%; background: white; 
-      display: flex; justify-content: space-around; padding: 12px 0; 
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000;
+    /* 2. Modal Popup Layer Styles (For Checkout and Details Form) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 5000;
     }
-    .nav-item { position: relative; font-size: 14px; font-weight: 600; cursor: pointer; color: #333; }
-    .badge { position: absolute; top: -12px; right: -15px; background: red; color: white; padding: 2px 6px; border-radius: 50%; font-size: 10px; display: none; }
+    .modal-content {
+      background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto;
+    }
+    .modal-content h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
+    .form-group { margin-bottom: 12px; text-align: left; }
+    .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #555; }
+    .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+    
+    .cart-summary-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #eee; font-size: 13px; }
+    .cart-del-btn { background: none; border: none; color: var(--sale); font-weight: bold; cursor: pointer; }
+
+    .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+    .submit-btn { background: var(--primary); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .close-btn { background: #eee; color: #333; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
     #cookieBar { 
-      position: fixed; bottom: 70px; left: 10px; right: 10px; 
-      background: #333; color: white; padding: 12px; 
+      position: fixed; bottom: 20px; left: 10px; right: 10px; 
+      background: rgba(51, 51, 51, 0.95); color: white; padding: 12px; 
       border-radius: 10px; display: none; justify-content: space-between; align-items: center; font-size: 13px; z-index: 2000;
     }
-    #cookieBar button { background: var(--accent); border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    #cookieBar button { background: var(--accent); color: #333; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
   </style>
 </head>
 <body>
 
+<!-- 1. Real App Loading Screen -->
+<div id="loadingScreen">
+  <div class="loader-logo">🛒 Blinkart</div>
+  <div class="spinner"></div>
+  <p style="margin-top:15px; font-weight:bold; color:#555;">Loading Wholesale Store...</p>
+</div>
+
+<div id="appNotification">Notification Text</div>
+
 <header>
-  <div class="logo">🛒 Blinkart</div>
+  <div class="header-top">
+    <div class="logo">🛒 Blinkart</div>
+    <div class="top-nav-actions">
+      <div class="nav-item" onclick="showInlineNotification('🔔 Sale starts: 17 May, 6 AM!')">🔔 Notif <span id="nBadge" class="badge">0</span></div>
+      <div class="nav-item" onclick="checkout()">🛍️ Cart (<span id="cCount">0</span>)</div>
+    </div>
+  </div>
   <div class="search-box"><input type="text" id="findInput" placeholder="Search items..."></div>
 </header>
 
@@ -69,14 +144,37 @@
 
 <div id="main-content"></div>
 
+<!-- 2. Customer Details & Cart Overlay Modal -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal-content">
+    <h3>🛍️ Your Shopping Cart</h3>
+    <div id="cartItemsList"></div>
+    <div style="font-weight: bold; margin: 15px 0; text-align: right; color: var(--primary);" id="cartTotalBill">Total: ₹0</div>
+    
+    <h3>👤 Customer Delivery Details</h3>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="custName" placeholder="Enter your name">
+    </div>
+    <div class="form-group">
+      <label>Mobile Number</label>
+      <input type="tel" id="custPhone" placeholder="Enter 10 digit number">
+    </div>
+    <div class="form-group">
+      <label>Delivery Address</label>
+      <textarea id="custAddress" rows="2" placeholder="Complete address with landmark"></textarea>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="close-btn" onclick="closeModal()">Back</button>
+      <button class="submit-btn" onclick="submitOrder()">Place Order</button>
+    </div>
+  </div>
+</div>
+
 <div id="cookieBar">
   <span>Allow cookies to save your cart? 🍪</span>
   <button onclick="acceptCookies()">Accept</button>
-</div>
-
-<div class="bottom-nav">
-  <div class="nav-item" onclick="alert('Sale starts: 17 May, 6 AM!')">🔔 Notif <span id="nBadge" class="badge">0</span></div>
-  <div class="nav-item" onclick="checkout()">🛍️ Checkout (<span id="cCount">0</span>)</div>
 </div>
 
 <script>
@@ -118,6 +216,13 @@
   let cart = [];
   let n = 0;
 
+  function showInlineNotification(text) {
+    const banner = document.getElementById("appNotification");
+    banner.innerText = text;
+    banner.classList.add("show");
+    setTimeout(() => { banner.classList.remove("show"); }, 3000);
+  }
+
   function isSale() {
     const now = new Date();
     const start = new Date(now.getFullYear(), 4, 17, 6, 0, 0); 
@@ -144,7 +249,18 @@
             fPrice = Math.round(p.price * 0.7);
             pHTML = `<span class="price-old">₹${p.price}</span><span class="price-new">₹${fPrice}</span>`;
           }
-          gridHTML += `<div class="card"><h4>${p.name}</h4>${pHTML}<button class="add-btn" onclick="add('${p.name}',${fPrice})">Add</button></div>`;
+          const countInCart = cart.filter(item => item.name === p.name).length;
+          const isRemovable = countInCart > 0 ? "active" : "";
+
+          gridHTML += `
+            <div class="card">
+              <h4>${p.name}</h4>
+              ${pHTML}
+              <div class="btn-group">
+                <button class="add-btn" onclick="add('${p.name}',${fPrice})">Add (${countInCart})</button>
+                <button class="remove-btn ${isRemovable}" onclick="removeOne('${p.name}')">-</button>
+              </div>
+            </div>`;
         });
         
         gridHTML += '</div>';
@@ -156,21 +272,97 @@
   function add(name, price) {
     cart.push({name, price});
     n++;
-    document.getElementById("cCount").innerText = cart.length;
-    document.getElementById("nBadge").innerText = n;
-    document.getElementById("nBadge").style.display = "block";
-    alert(name + " added!");
+    updateCartUI();
+    showInlineNotification(`🛒 ${name} added to cart!`);
+    render(document.getElementById("findInput").value);
   }
 
+  // Samaan hatane ka code (Remove single quantity)
+  function removeOne(name) {
+    const index = cart.findLastIndex(item => item.name === name);
+    if (index !== -1) {
+      cart.splice(index, 1);
+      updateCartUI();
+      showInlineNotification(`❌ Removed 1 ${name} from cart`);
+      render(document.getElementById("findInput").value);
+    } else {
+      showInlineNotification(`⚠️ ${name} is not in your cart`);
+    }
+  }
+
+  function updateCartUI() {
+    document.getElementById("cCount").innerText = cart.length;
+    document.getElementById("nBadge").innerText = cart.length;
+    document.getElementById("nBadge").style.display = cart.length > 0 ? "block" : "none";
+  }
+
+  // Open full dynamic checkout and form
   function checkout() {
-    if(cart.length === 0) return alert("Cart empty!");
+    if(cart.length === 0) return showInlineNotification("⚠️ Cart empty!");
+    
+    const listDiv = document.getElementById("cartItemsList");
+    listDiv.innerHTML = "";
+    
+    // Group items for display
+    let itemCounts = {};
+    cart.forEach(item => {
+      itemCounts[item.name] = (itemCounts[item.name] || {count: 0, price: item.price});
+      itemCounts[item.name].count++;
+    });
+
+    for(let name in itemCounts) {
+      listDiv.innerHTML += `
+        <div class="cart-summary-item">
+          <span>${name} (x${itemCounts[name].count})</span>
+          <span>₹${itemCounts[name].price * itemCounts[name].count} 
+            <button class="cart-del-btn" onclick="removeOne('${name}'); checkout();">✖</button>
+          </span>
+        </div>`;
+    }
+
     let total = cart.reduce((s, i) => s + i.price, 0);
-    alert("Total Items: " + cart.length + "\nTotal Bill: ₹" + total);
+    document.getElementById("cartTotalBill").innerText = "Total Bill: ₹" + total;
+    document.getElementById("checkoutModal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("checkoutModal").style.display = "none";
+  }
+
+  // Validate form and place order
+  function submitOrder() {
+    const name = document.getElementById("custName").value.trim();
+    const phone = document.getElementById("custPhone").value.trim();
+    const addr = document.getElementById("custAddress").value.trim();
+
+    if(!name || !phone || !addr) {
+      alert("Please fill all Customer Details for Local Delivery!");
+      return;
+    }
+    
+    let total = cart.reduce((s, i) => s + i.price, 0);
+    alert(`🎉 Order Success for ${name}!\nTotal Amount: ₹${total}\nDelivery to: ${addr}`);
+    
+    cart = [];
+    updateCartUI();
+    closeModal();
+    render();
   }
 
   function acceptCookies() { localStorage.setItem("b_cook", "1"); document.getElementById("cookieBar").style.display = "none"; }
-  window.onload = () => { if(!localStorage.getItem("b_cook")) document.getElementById("cookieBar").style.display = "flex"; render(); };
+  
+  window.onload = () => { 
+    // Loading Screen simulation for 2.5 seconds
+    setTimeout(() => {
+      document.getElementById("loadingScreen").style.opacity = "0";
+      setTimeout(() => document.getElementById("loadingScreen").style.display = "none", 400);
+    }, 2500);
+
+    if(!localStorage.getItem("b_cook")) document.getElementById("cookieBar").style.display = "flex"; 
+    render(); 
+  };
   document.getElementById("findInput").oninput = (e) => render(e.target.value);
 </script>
 </body>
 </html>
+
